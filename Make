@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anicha4ever - Flower Arranging</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Amatic+SC:wght@700&family=Varela+Round&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #EBCBCB; /* Antique Baby Pink */
+            font-family: 'Varela Round', sans-serif;
+        }
+        
+        .handwritten {
+            font-family: 'Dancing Script', cursive;
+        }
+
+        .hebrew-handwritten {
+            font-family: 'Amatic SC', cursive;
+        }
+
+        /* Animation for adding flowers */
+        @keyframes popIn {
+            0% { transform: scale(0) rotate(0deg); opacity: 0; }
+            80% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .flower-in-vase {
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            transform-origin: bottom center;
+        }
+
+        /* Vase layering logic to make stems look like they are inside */
+        .vase-container {
+            position: relative;
+            z-index: 10;
+        }
+        .flower-layer {
+            z-index: 5;
+        }
+        .vase-front {
+            z-index: 20;
+            pointer-events: none; /* Let clicks pass through */
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between p-4 text-[#4A3B3B]">
+
+    <!-- Header -->
+    <header class="w-full text-center mt-4 mb-8">
+        <h1 class="handwritten text-6xl md:text-8xl text-[#8B5E5E] drop-shadow-sm">Anicha4ever</h1>
+        <p class="hebrew-handwritten text-2xl mt-2 text-[#6D4C4C]">סדרו את הזר שלכם</p>
+    </header>
+
+    <!-- Main Game Area -->
+    <main class="flex flex-col md:flex-row w-full max-w-5xl gap-8 items-center justify-center flex-grow">
+        
+        <!-- Left Side: The Vase (Canvas) -->
+        <div class="relative w-full md:w-1/2 h-[500px] flex justify-center items-end pb-10 border-b-2 border-[#8B5E5E]/20 md:border-none">
+            
+            <!-- Flowers Container (Sit "inside" the vase) -->
+            <div id="flower-container" class="absolute bottom-[160px] w-[200px] h-[300px] pointer-events-none flower-layer">
+                <!-- Flowers will be injected here via JS -->
+            </div>
+
+            <!-- The Vase Drawing (SVG) -->
+            <div class="relative w-[220px] h-[220px] vase-front">
+                <svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-xl">
+                    <!-- Square White Vase with Hand-drawn style stroke -->
+                    <path d="M40,40 L160,40 L155,190 L45,190 Z" fill="white" stroke="#4A3B3B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    <!-- Decorative lines/shading -->
+                    <path d="M50,50 L55,150" stroke="#E5E5E5" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M160,40 Q165,115 155,190" stroke="#4A3B3B" stroke-width="3" stroke-linecap="round" fill="none"/>
+                </svg>
+            </div>
+            
+            <!-- Reset Button -->
+            <button onclick="clearVase()" class="absolute bottom-0 right-0 md:right-10 bg-white/50 hover:bg-white/80 p-2 rounded-full text-sm transition-all" title="רוקן כד (התחלה מחדש)">
+                🔄 איפוס
+            </button>
+        </div>
+
+        <!-- Right Side: Flower Selection -->
+        <div class="w-full md:w-1/2 flex flex-col items-center">
+            <h2 class="hebrew-handwritten text-4xl mb-6">בחרו פרחים:</h2>
+            <div class="grid grid-cols-2 gap-6">
+                
+                <!-- Rose -->
+                <button onclick="addFlower('rose')" class="group flex flex-col items-center p-4 bg-white/40 rounded-xl hover:bg-white/70 transition-all transform hover:scale-105 shadow-sm border border-white/50">
+                    <div class="w-16 h-16 mb-2">
+                        <svg viewBox="0 0 100 100" class="w-full h-full overflow-visible">
+                            <!-- Stem -->
+                            <path d="M50,90 Q50,70 50,50" stroke="green" stroke-width="3" fill="none"/>
+                            <!-- Rose Head -->
+                            <path d="M30,30 Q50,10 70,30 Q80,50 50,70 Q20,50 30,30" fill="#E84A5F" stroke="#C0392B" stroke-width="2"/>
+                            <path d="M40,40 Q50,30 60,40" fill="none" stroke="#800000" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <span class="font-bold">ורד</span>
+                </button>
+
+                <!-- Tulip -->
+                <button onclick="addFlower('tulip')" class="group flex flex-col items-center p-4 bg-white/40 rounded-xl hover:bg-white/70 transition-all transform hover:scale-105 shadow-sm border border-white/50">
+                    <div class="w-16 h-16 mb-2">
+                        <svg viewBox="0 0 100 100" class="w-full h-full overflow-visible">
+                            <path d="M50,90 Q55,70 50,50" stroke="green" stroke-width="3" fill="none"/>
+                            <path d="M35,30 Q30,60 50,70 Q70,60 65,30 L50,45 L35,30" fill="#FFB7B2" stroke="#E57373" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <span class="font-bold">טוליפ</span>
+                </button>
+
+                <!-- Lily -->
+                <button onclick="addFlower('lily')" class="group flex flex-col items-center p-4 bg-white/40 rounded-xl hover:bg-white/70 transition-all transform hover:scale-105 shadow-sm border border-white/50">
+                    <div class="w-16 h-16 mb-2">
+                        <svg viewBox="0 0 100 100" class="w-full h-full overflow-visible">
+                            <path d="M50,90 L50,50" stroke="green" stroke-width="3" fill="none"/>
+                            <path d="M50,50 Q30,20 20,40 Q40,50 50,50" fill="white" stroke="#FFA500" stroke-width="1"/>
+                            <path d="M50,50 Q70,20 80,40 Q60,50 50,50" fill="white" stroke="#FFA500" stroke-width="1"/>
+                            <path d="M50,50 Q50,10 50,30" fill="none" stroke="#FFA500" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <span class="font-bold">לילי</span>
+                </button>
+
+                <!-- Peony -->
+                <button onclick="addFlower('peony')" class="group flex flex-col items-center p-4 bg-white/40 rounded-xl hover:bg-white/70 transition-all transform hover:scale-105 shadow-sm border border-white/50">
+                    <div class="w-16 h-16 mb-2">
+                        <svg viewBox="0 0 100 100" class="w-full h-full overflow-visible">
+                            <path d="M50,90 Q45,70 50,50" stroke="green" stroke-width="3" fill="none"/>
+                            <circle cx="40" cy="40" r="15" fill="#F8BBD0" stroke="#EC407A" stroke-width="1" opacity="0.8"/>
+                            <circle cx="60" cy="40" r="15" fill="#F8BBD0" stroke="#EC407A" stroke-width="1" opacity="0.8"/>
+                            <circle cx="50" cy="30" r="15" fill="#F48FB1" stroke="#EC407A" stroke-width="1"/>
+                            <circle cx="50" cy="50" r="12" fill="#F06292" stroke="#EC407A" stroke-width="1"/>
+                        </svg>
+                    </div>
+                    <span class="font-bold">פיוני</span>
+                </button>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer: Anicha Explanation -->
+    <footer class="w-full max-w-4xl mt-12 bg-white/30 backdrop-blur-sm p-6 rounded-t-2xl border-t border-white/40">
+        <h3 class="font-bold text-xl mb-2 text-[#8B5E5E]">מה זה אניצ'ה (Anicca)?</h3>
+        <p class="text-md leading-relaxed">
+            בבודהיזם, <strong>אניצ'ה</strong> (Anicca) היא התפיסה של <strong>ארעיות</strong>. 
+            היא מלמדת אותנו שכל הדברים המותנים - בין אם הם חומריים או מנטליים - נמצאים במצב תמידי של שינוי. 
+            שום דבר לא נשאר לנצח. בדיוק כמו זר פרחים: הוא מתחיל כניצן, פורח במלוא הדרו, ולבסוף נובל. 
+            ההבנה והקבלה של טבע זה של המציאות נחשבת למפתח לשחרור מסבל וליצירת שלווה פנימית.
+        </p>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        const flowerContainer = document.getElementById('flower-container');
+
+        // SVG templates for the flowers to be injected into the vase
+        const flowerSVGs = {
+            rose: `
+                <svg viewBox="0 0 100 300" class="w-full h-full overflow-visible" preserveAspectRatio="none">
+                    <path d="M50,300 Q45,200 50,50" stroke="#2E7D32" stroke-width="4" fill="none"/>
+                    <path d="M50,150 Q70,140 80,160" stroke="#2E7D32" stroke-width="3" fill="#4CAF50" opacity="0.8"/>
+                    <g transform="translate(0, -20)">
+                        <path d="M30,50 Q50,20 70,50 Q80,80 50,100 Q20,80 30,50" fill="#E84A5F" stroke="#C0392B" stroke-width="2"/>
+                        <path d="M40,60 Q50,40 60,60" fill="none" stroke="#800000" stroke-width="2"/>
+                        <path d="M50,50 Q65,65 50,80 Q35,65 50,50" fill="#D32F2F" opacity="0.5"/>
+                    </g>
+                </svg>`,
+            tulip: `
+                <svg viewBox="0 0 100 300" class="w-full h-full overflow-visible" preserveAspectRatio="none">
+                    <path d="M50,300 Q55,200 50,50" stroke="#388E3C" stroke-width="4" fill="none"/>
+                    <path d="M50,200 Q30,180 20,220" stroke="#388E3C" stroke-width="3" fill="#66BB6A" opacity="0.8"/>
+                    <g transform="translate(0, -20)">
+                        <path d="M35,40 Q30,80 50,90 Q70,80 65,40 L50,60 L35,40" fill="#FFB7B2" stroke="#E57373" stroke-width="2"/>
+                    </g>
+                </svg>`,
+            lily: `
+                <svg viewBox="0 0 100 300" class="w-full h-full overflow-visible" preserveAspectRatio="none">
+                    <path d="M50,300 L50,50" stroke="#43A047" stroke-width="3" fill="none"/>
+                    <g transform="translate(0, -10)">
+                        <path d="M50,50 Q20,10 10,40 Q40,60 50,50" fill="white" stroke="#FFA500" stroke-width="1"/>
+                        <path d="M50,50 Q80,10 90,40 Q60,60 50,50" fill="white" stroke="#FFA500" stroke-width="1"/>
+                        <path d="M50,50 Q50,0 50,30" fill="white" stroke="#FFA500" stroke-width="1"/>
+                        <circle cx="50" cy="50" r="5" fill="#FFD54F"/>
+                    </g>
+                </svg>`,
+            peony: `
+                <svg viewBox="0 0 100 300" class="w-full h-full overflow-visible" preserveAspectRatio="none">
+                    <path d="M50,300 Q48,150 50,50" stroke="#1B5E20" stroke-width="4" fill="none"/>
+                    <g transform="translate(0, -10) scale(1.2)">
+                        <circle cx="40" cy="40" r="15" fill="#F8BBD0" stroke="#EC407A" stroke-width="1"/>
+                        <circle cx="60" cy="40" r="15" fill="#F8BBD0" stroke="#EC407A" stroke-width="1"/>
+                        <circle cx="50" cy="30" r="15" fill="#F48FB1" stroke="#EC407A" stroke-width="1"/>
+                        <circle cx="50" cy="50" r="12" fill="#F06292" stroke="#EC407A" stroke-width="1"/>
+                    </g>
+                </svg>`
+        };
+
+        function addFlower(type) {
+            // Create a wrapper div for the flower
+            const flowerWrapper = document.createElement('div');
+            flowerWrapper.className = 'absolute flower-in-vase';
+            flowerWrapper.style.width = '100px';
+            flowerWrapper.style.height = '300px';
+            
+            // Randomize position and rotation for natural look
+            // Move left/right slightly
+            const randomLeft = Math.floor(Math.random() * 80) + 10; // 10% to 90%
+            // Rotate slightly (-20deg to 20deg)
+            const randomRotate = Math.floor(Math.random() * 40) - 20;
+            // Height variation
+            const randomBottom = Math.floor(Math.random() * 30) - 10;
+            // Z-index random to shuffle layers
+            const randomZ = Math.floor(Math.random() * 10);
+
+            flowerWrapper.style.left = `calc(${randomLeft}% - 50px)`;
+            flowerWrapper.style.bottom = `${randomBottom}px`;
+            flowerWrapper.style.transform = `rotate(${randomRotate}deg)`;
+            flowerWrapper.style.zIndex = randomZ;
+
+            // Insert SVG content
+            flowerWrapper.innerHTML = flowerSVGs[type];
+
+            // Add to container
+            flowerContainer.appendChild(flowerWrapper);
+
+            // Limit max flowers (optional, for performance/visuals)
+            if (flowerContainer.children.length > 20) {
+                // If too many, remove the oldest one (Anicha style - impermanence!)
+                flowerContainer.removeChild(flowerContainer.firstChild);
+            }
+        }
+
+        function clearVase() {
+            flowerContainer.innerHTML = '';
+        }
+    </script>
+</body>
+</html>
